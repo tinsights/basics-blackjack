@@ -142,5 +142,5 @@ function toggleOpts() {
 }
 function main(action) {
   eval(action);
-  input.value = "";
+  input[0].selected = true;
 }
