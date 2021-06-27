@@ -86,9 +86,9 @@
       <p>Action:</p>
       <select id="input-field">
         <option value=""  selected disabled>What would you like to do?</option>
-        <option value="new-game">Start a new game</option>
-        <option value="hit">Hit!</option>
-        <option value="stand">Stand</option>
+        <option value="startGame()">Start a new game</option>
+        <option value="hit()" disabled>Hit!</option>
+        <option value="stand()" disabled>Stand</option>
       <select>
       <br />
       <button id="submit-button">Submit</button>
@@ -98,20 +98,5 @@
     <!-- Import program logic -->
     <script src="script.js"></script>
     <!-- Define button click functionality -->
-    <script>
-      var button = document.querySelector("#submit-button");
-      button.addEventListener("click", function () {
-        // Set result to input value
-        var input = document.querySelector("#input-field");
-        var result = main(input.value);
-
-        // Display result in output element
-        var output = document.querySelector("#output-div");
-        output.innerHTML = result;
-
-        // Reset input value
-        input.value = "";
-      });
-    </script>
   </body>
 </html>
