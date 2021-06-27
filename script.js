@@ -1,7 +1,7 @@
 let button = document.querySelector("#submit-button");
 let output = document.querySelector("#output-div");
 let input = document.querySelector("#input-field");
-button.addEventListener("click", (lambda = () => main(input.value)));
+button.addEventListener("click", (lambda = () => eval(input.value)));
 
 let deck = [];
 let playerHand = [];
@@ -38,15 +38,12 @@ function generateCard(rank, suit) {
 
 // generate a shuffled standard deck of cards
 function generateDeck() {
-  console.log("Generating deck!");
-  let deck = [];
   const suits = ["Clubs", "Diamonds", "Hearts", "Spades"];
   for (let i = 1; i <= 13; i++) {
     for (let j = 0; j < 4; j++) {
       deck.splice(Math.floor(Math.random() * deck.length), 0, generateCard(i, suits[j]));
     }
   }
-  return deck;
 }
 
 function blackjack(hand) {
@@ -58,28 +55,38 @@ function blackjack(hand) {
   return false;
 }
 
-function deal(player) {
+function deal() {
   return deck.shift();
-  // player.push(card);
 }
 
 function score(hand) {
-  let size = hand.length;
   let total = 0;
-  for (i = 0; i < size; i++) {
-    if (hand[i].name == "Ace" && total <= 10) {
-      total += 11;
+  let aces = 0;
+  for (i = 0; i < hand.length; i++) {
+    if (hand[i].name == "Ace") {
+      aces++;
     } else {
       total += hand[i].value;
+    }
+  }
+  while (aces > 0) {
+    if (total <= 11 - aces) {
+      total += 11;
+      aces--;
+    } else {
+      total++;
+      aces--;
     }
   }
   return total;
 }
 
+console.log(score(hand));
+
 function startGame() {
   toggleOpts();
   output.innerHTML = "Good luck!" + "<br><br>";
-  deck = generateDeck();
+  generateDeck();
   playerHand = [deal(), deal()];
   dealerHand = [deal(), deal()];
 
@@ -88,11 +95,9 @@ function startGame() {
   output.innerHTML += firstDeal + "<br><br>";
   if (blackjack(playerHand)) {
     output.innerHTML += "Blackjack!";
-    if (dealerHand[0].value.toString()[0] == "1") {
+    if (blackjack(dealerHand)) {
       let reveal = `Unfortunately, the dealer reveals the ${dealerHand[1].title}.`;
       output.innerHTML += "<br><br>" + reveal + "<br><br>";
-    }
-    if (blackjack(dealerHand)) {
       output.innerHTML += "Draw!";
     } else {
       output.innerHTML += "You win!";
@@ -139,8 +144,5 @@ function toggleOpts() {
   input[1].disabled = !input[1].disabled;
   input[2].disabled = !input[2].disabled;
   input[3].disabled = !input[3].disabled;
-}
-function main(action) {
-  eval(action);
   input[0].selected = true;
 }
