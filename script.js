@@ -83,7 +83,7 @@ function startGame() {
   playerHand = [deal(), deal()];
   dealerHand = [deal(), deal()];
 
-  let firstDeal = `You have been dealt the ${playerHand[0].title} and the ${playerHand[1].title}. <br>
+  let firstDeal = `You have been dealt the ${playerHand[0].title} and the ${playerHand[1].title}.<br><br>
                     The dealer's face-up card is the ${dealerHand[0].title}.`;
   output.innerHTML += firstDeal + "<br><br>";
   if (blackjack(playerHand)) {
@@ -142,4 +142,5 @@ function toggleOpts() {
 }
 function main(action) {
   eval(action);
+  input.value = "";
 }
