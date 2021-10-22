@@ -21,29 +21,37 @@ var gameDeck = 'empty at the start';
 /* =========== DECK CREATION FUNCTIONS ============== */
 /* ================================================== */
 
-// Function that generates a random number, used by shuffle deck function
-var getRandomIndex = function (size) {
-  return Math.floor(Math.random() * size);
+// Function that takes in a number as input,
+// generates a random number between 0 and input
+// Is used as a helper by the shuffleDeck function
+var getRandomIndex = function (max) {
+  return Math.floor(Math.random() * max);
 };
 
-// Function that creates a deck of cards, used by createNewDeck function
+// Function that takes no input,
+// creates a standard 52 card deck,
+// Is used as a helper by createNewDeck function
 var createDeck = function () {
-  // deck array
+  // Declare and initialise an empty array to hold the deck of cards
   var deck = [];
-  // for 'while loop' to create suits for cards
+  // Static array with the suits that we will loop over 
   var suits = ['Diamonds', 'Clubs', 'Hearts', 'Spades'];
-  var indexSuits = 0;
-  while (indexSuits < suits.length) {
-    var currSuit = suits[indexSuits];
-    // 13 ranks... ace to king - rank to define "card positions"
-    var indexRanks = 1;
-    while (indexRanks <= 13) {
-      var cardName = indexRanks;
-      // define card value - differentiate from rank: 'ace' = 1 / 11, 'jack' & 'queen' & 'king' = 10
+  // Using a while loop to select each suit from the suits array,
+  // and using an inner loop to create 13 cards per suit
+  // adding each card to the deck array.
+  var suitCounter = 0;
+  while (suitCounter < suits.length) {
+    // Select the current suit we want to create cards for
+    var currSuit = suits[suitCounter];
+    // Creating 13 cards for each suit
+    var cardCounter = 1;
+    while (cardCounter <= 13) {
+      // By default, the name of the card is equal to it's "rank" or "number":
+      var cardName = cardCounter;
+      // the exceptions are cards number 1 and cards number 11-13
+      // so for those iterations of the loop, we re-write the value of cardName
       if (cardName == 1) {
         cardName = 'Ace';
-        // define ace value as 11 all the way. if handValue > 10, -11 to total value
-        // vs. coding a function to redefine the value for ace
       }
       if (cardName == 11) {
         cardName = 'Jack';
@@ -54,35 +62,47 @@ var createDeck = function () {
       if (cardName == 13) {
         cardName = 'King';
       }
+      // store all the properties of a card in a new object
+      // every card has a name, suit and rank.
       var card = {
         name: cardName,
         suit: currSuit,
-        rank: indexRanks,
+        rank: cardCounter,
       };
+      // add the newly created card object to the deck array
       deck.push(card);
-      indexRanks = indexRanks + 1;
+      cardCounter = cardCounter + 1;
     }
-    indexSuits = indexSuits + 1;
+    suitCounter = suitCounter + 1;
   }
   return deck;
 };
 
-// Function that shuffles a deck, used by createNewDeck function
-var shuffleDeck = function (cards) {
+// Function that takes in an array of cards as input,
+// returns the same array with elements in random order
+// used by the createShuffledDeck function
+var shuffleDeck = function (deck) {
   var index = 0;
-  while (index < cards.length) {
-    var randomIndex = getRandomIndex(cards.length);
-    var currentItem = cards[index];
-    var randomItem = cards[randomIndex];
-    cards[index] = randomItem;
-    cards[randomIndex] = currentItem;
+  // using a loop to select each card from the deck, starting from the first card
+  while (index < deck.length) {
+    // select a second, random card in the deck
+    var randomIndex = getRandomIndex(deck.length);
+    // store the first selected and second random cards in two separate variables
+    var currentItem = deck[index];
+    var randomItem = deck[randomIndex];
+    // replace the original card with the random card
+    deck[index] = randomItem;
+    // replace the randomly selected card with the original card
+    deck[randomIndex] = currentItem;
+    // move on to the next card
     index = index + 1;
   }
   return cards;
 };
 
-// Function that creates and shuffles a deck
-var createNewDeck = function () {
+// Function that creates a shuffled standard 52 card deck
+// using previously defined helper functions
+var createShuffledDeck = function () {
   var newDeck = createDeck();
   var shuffledDeck = shuffleDeck(newDeck);
   return shuffledDeck;
@@ -92,64 +112,60 @@ var createNewDeck = function () {
 /* ================ GAME FUNCTIONS ================ */
 /* ================================================ */
 
-// Function that checks a hand for black jack
-var checkForBlackJack = function (handArray) {
-  // Loop through player hand 
-  // if there is a blackjack return true
-  // else return false
-  var playerCardOne = handArray[0];
-  var playerCardTwo = handArray[1];
-  var isBlackJack = false;
-
-  // Possible black jack scenerios 
-  // double Aces 
-  // First card is Ace +  Second card is 10 or suits
-  // Second card is Ace +  First card is 10 or suits
-  if (  
-    (playerCardOne.name == 'Ace' && playerCardTwo.name == 'Ace') ||
-    (playerCardOne.name == 'Ace' && playerCardTwo.rank >= 10) ||
-    (playerCardTwo.name == 'Ace' && playerCardOne.rank >= 10)
-    ){
-    isBlackJack = true;
-  }
-
-  return isBlackJack;
-};
-
-// Function that calculates a hand
+// Function that takes in an array of card objects,
+// and returns the score of that hand.
 var calculateTotalHandValue = function (handArray) {
-
   var totalHandValue = 0;
-  var aceCounter = 0;
+  // we will initialise a counter to keep track of the number of aces
+  // to be used later to determine if an ace should be valued as 11 or 1.
+  var numOfAces = 0;
 
-  // Loop through player or dealers hand and add up the ranks
-  var index = 0;
-  while (index < handArray.length) {
+  // Loop through hand and add up the score
+  var cardCounter = 0;
+  while (cardCounter < handArray.length) {
 
-    var currCard = handArray[index];
+    var currCard = handArray[cardCounter];
 
-    // In black jack king queen and jack are counted as 10
+    // Add 10 for each Picture Card
     if (currCard.name == 'King' || currCard.name == 'Queen' || currCard.name == 'Jack'){
       totalHandValue = totalHandValue + 10;
     }
+    // We will first add 11 for each Ace, and then later check if we should reduce it to 1
     else if (currCard.name == 'Ace') {
       totalHandValue = totalHandValue + 11;
-      aceCounter = aceCounter + 1;
-    } else {
+      numOfAces = numOfAces + 1;
+    } 
+    // in the default case, we will just increament the score by the rank of the card
+    else {
       totalHandValue = totalHandValue + currCard.rank;
     }
-    index = index + 1;
+    cardCounter = cardCounter + 1;
   }
-
-  index = 0 // 2
-  while (index < aceCounter){
+  // Checking to see if any of the aces should be switched to value 1 instead of 11
+  var aceCounter = 0 
+  while (aceCounter < numOfAces){
     if (totalHandValue > 21){
       totalHandValue = totalHandValue - 10;
     }
-    index = index + 1;
+    aceCounter = aceCounter + 1;
   }
 
   return totalHandValue;
+};
+
+// Function that takes in an array as input representing a "hand"
+// and checks that hand for BlackJack
+var checkForBlackJack = function (handArray) {
+  // Let's start by creating a boolean variable, initialised as false
+  // which will be switched to true if we find blackjack
+  var isBlackJack = false;
+  // We can be a bit smart here,
+  // A hand is only blackjack if and only if the hand contains 2 cards
+  // and the 2 cards sum up to a score of 11.
+  if (handArray.length == 2 && calculateTotalHandValue(handArray) == 21) {
+    isBlackJack == true;
+  }
+  return isBlackJack;
 };
 
 // Function that displays the player and dealers hand in a message
